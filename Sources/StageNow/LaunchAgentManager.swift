@@ -11,7 +11,7 @@ final class LaunchAgentManager {
         var description: String {
             switch self {
             case .binaryNotFound(let path):
-                return "Could not locate StageManager binary at \(path). Build the project first."
+                return "Could not locate StageNow binary at \(path). Build the project first."
             case .writeFailed(let message):
                 return "Failed to write launch agent: \(message)"
             case .launchctlFailed(let message, let code):

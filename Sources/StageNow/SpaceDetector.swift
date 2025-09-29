@@ -11,7 +11,7 @@ typealias CGSSpaceID = UInt32
 #endif
 
 class SpaceDetector {
-    // 存储已知的桌面空间特征
+    // Store known desktop space characteristics
     private static var knownSpaces: [String: UInt64] = [:]
     private static var nextSpaceID: UInt64 = 1
     private static var lastSpaceSignature: String = ""
@@ -56,39 +56,7 @@ class SpaceDetector {
         return unsafeBitCast(symbol, to: CGSGetActiveSpaceFn.self)
     }()
 
-    // 使用智能桌面检测方法
     static func getCurrentSpaceID() -> UInt64? {
-        if let skyLightID = getSkyLightSpaceID() {
-            lastSkyLightSpaceID = skyLightID
-            return skyLightID
-        }
-
-        let spaceSignature = generateDesktopSignature()
-        
-        // 如果签名没有变化，返回上次的结果
-        if spaceSignature == lastSpaceSignature, let existingID = knownSpaces[spaceSignature] {
-            return existingID
-        }
-        
-        // 检查是否是已知的桌面空间
-        if let existingID = knownSpaces[spaceSignature] {
-            lastSpaceSignature = spaceSignature
-            return existingID
-        }
-        
-        // 这是一个新的桌面空间
-        let newSpaceID = nextSpaceID
-        knownSpaces[spaceSignature] = newSpaceID
-        nextSpaceID += 1
-        lastSpaceSignature = spaceSignature
-        if Date().timeIntervalSince(lastSkyLightLogTime) > 1.0 {
-            print("[Space] Tracking heuristically: \(describe(spaceID: newSpaceID, fallbackNumber: nil))")
-            lastSkyLightLogTime = Date()
-        }
-        return newSpaceID
-    }
-
-    private static func getSkyLightSpaceID() -> UInt64? {
         guard let connection = mainConnectionID,
               let activeFn = getActiveSpaceFunction else {
             return nil
@@ -232,11 +200,11 @@ class SpaceDetector {
         }
         return layout.orderedSpaceIDs[order - 1]
     }
-    // 生成桌面特征签名 - 基于多种因素的组合
+    // Generate desktop signature - based on combination of multiple factors
     private static func generateDesktopSignature() -> String {
         var components: [String] = []
         
-        // 1. 前台应用程序
+        // 1. Foreground application
         if let frontApp = NSWorkspace.shared.frontmostApplication {
             components.append("front:\(frontApp.bundleIdentifier ?? frontApp.localizedName ?? "unknown")")
         }

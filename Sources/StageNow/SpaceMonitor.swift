@@ -17,7 +17,7 @@ final class SpaceMonitor {
     func startMonitoring() {
         print("[Listen] Starting space monitoring...")
 
-        currentSpaceID = getCurrentSpaceID()
+        currentSpaceID = SpaceDetector.getCurrentSpaceID() ?? 0
         syncSpaceMappingWithLayout()
 
         if currentSpaceID != 0 {
@@ -71,7 +71,7 @@ final class SpaceMonitor {
     private func handleSpaceChange() {
         syncSpaceMappingWithLayout()
 
-        let newSpaceID = getCurrentSpaceID()
+        let newSpaceID = SpaceDetector.getCurrentSpaceID() ?? getConsistentSpaceID()
         let newSpaceNumber = getSpaceNumber(for: newSpaceID)
 
         if newSpaceID != currentSpaceID && newSpaceID != 0 {
@@ -144,24 +144,6 @@ final class SpaceMonitor {
             print("[Listen] Space order synced: \(summary)")
             lastSpaceOrderSignature = signature
         }
-    }
-
-    private func getCurrentSpaceID() -> UInt64 {
-        if let spaceID = SpaceDetector.getCurrentSpaceID() {
-            return spaceID
-        }
-
-        let windowHash = getWindowHash()
-        if windowHash != 0 {
-            return windowHash
-        }
-
-        let appHash = getApplicationHash()
-        if appHash != 0 {
-            return appHash
-        }
-
-        return getConsistentSpaceID()
     }
 
     private func getWindowHash() -> UInt64 {

@@ -20,7 +20,7 @@ func runDaemonMode() -> Never {
 }
 
 func runCommandLineMode() -> Int32 {
-    let app = StageManagerApp()
+    let app = StageNowApp()
     return app.run()
 }
 

@@ -116,6 +116,6 @@ final class StageManagerXPCClient {
         if kill(pid, 0) == 0 {
             return true
         }
-        return errno != ESRCH
+        return errno != ESRCH ? true : false
     }
 }

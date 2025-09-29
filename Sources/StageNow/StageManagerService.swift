@@ -11,13 +11,13 @@ final class StageManagerService: NSObject, NSXPCListenerDelegate {
     private var configObserverToken: UUID?
     private var knownSpaceIDs = Set<UInt64>()
 
-    private let stateQueue = DispatchQueue(label: "com.stagenow.service")
+    private let stateQueue = DispatchQueue(label: "by.akashina.stagenow.service")
     private var currentSpaceID: UInt64 = 0
     private var currentSpaceNumber: Int = 0
     private var lastAppliedSpaceID: UInt64 = 0
     private var lastAppliedState: Bool?
 
-    static let machServiceName = "com.stagenow.StageManager"
+    static let machServiceName = "by.akashina.stagenow"
 
     init(configuration: Configuration) {
         self.configuration = configuration
@@ -31,7 +31,7 @@ final class StageManagerService: NSObject, NSXPCListenerDelegate {
         listener.resume()
         writeEndpointInfo()
 
-    print("[XPC] Mach service '\(StageManagerService.machServiceName)' ready (PID: \(ProcessInfo.processInfo.processIdentifier))")
+        print("[XPC] Mach service '\(StageManagerService.machServiceName)' ready (PID: \(ProcessInfo.processInfo.processIdentifier))")
 
         configObserverToken = configuration.addObserver { [weak self] change in
             self?.handleConfigurationChange(change)
@@ -111,11 +111,9 @@ final class StageManagerService: NSObject, NSXPCListenerDelegate {
             stageManagerControl.disableStageManager()
         }
     }
-}
 
-// MARK: - XPC support
+    // MARK: - XPC support
 
-extension StageManagerService {
     static func pidFileURL() -> URL {
         let base = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library", isDirectory: true)

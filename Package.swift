@@ -2,19 +2,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "StageManager",
+    name: "StageNow",
     platforms: [
         .macOS(.v13)
     ],
     products: [
-        .executable(name: "StageManager", targets: ["StageManager"])
+        .executable(name: "StageNow", targets: ["StageNow"])
     ],
     dependencies: [],
     targets: [
         .executableTarget(
-            name: "StageManager",
+            name: "StageNow",
             dependencies: [],
-            path: "Sources/StageManager"
+            path: "Sources/StageNow"
         )
     ]
 )

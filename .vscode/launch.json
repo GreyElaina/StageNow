@@ -17,6 +17,24 @@
             "name": "Release StageManager",
             "program": "${workspaceFolder:stage-now}/.build/release/StageManager",
             "preLaunchTask": "swift: Build Release StageManager"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:stage-now}",
+            "name": "Debug StageNow",
+            "program": "${workspaceFolder:stage-now}/.build/debug/StageNow",
+            "preLaunchTask": "swift: Build Debug StageNow"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:stage-now}",
+            "name": "Release StageNow",
+            "program": "${workspaceFolder:stage-now}/.build/release/StageNow",
+            "preLaunchTask": "swift: Build Release StageNow"
         }
     ]
 }

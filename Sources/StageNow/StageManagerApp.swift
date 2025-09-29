@@ -1,7 +1,7 @@
 import Foundation
 import AppKit
 
-class StageManagerApp {
+class StageNowApp {
     private let stageManagerControl = StageManagerControl()
     private let configuration = Configuration()
     private var service: StageManagerService?
@@ -135,7 +135,7 @@ class StageManagerApp {
         Stage Manager Controller
 
         USAGE:
-          StageManager [OPTIONS]
+          StageNow [OPTIONS]
 
         OPTIONS:
           --daemon              Run in background to monitor space changes
@@ -151,20 +151,20 @@ class StageManagerApp {
           --space-enable <id>   Enable Stage Manager for the given space
           --space-disable <id>  Disable Stage Manager for the given space
 
-          --install-agent       Install and start the StageManager launch agent (persists daemon)
-          --reinstall-agent     Reinstall the StageManager launch agent
-          --uninstall-agent     Stop and remove the StageManager launch agent
+          --install-agent       Install and start the StageNow launch agent (persists daemon)
+          --reinstall-agent     Reinstall the StageNow launch agent
+          --uninstall-agent     Stop and remove the StageNow launch agent
           --help, -h            Show help information
 
         RUNTIME CONTROL:
           When the daemon is running, the CLI communicates via XPC.
           Start the daemon first:
-            StageManager --daemon
+            StageNow --daemon
           Or install the launch agent to run it automatically:
-            StageManager --install-agent
+            StageNow --install-agent
           Then run commands such as:
-            StageManager --toggle
-            StageManager --snapshot
+            StageNow --toggle
+            StageNow --snapshot
         """)
     }
 
@@ -212,7 +212,7 @@ class StageManagerApp {
         } catch let error as StageManagerXPCClient.ClientError {
             switch error {
             case .daemonUnavailable:
-                print("StageManager daemon is not available. Start it with 'StageManager --daemon' or install it via '--install-agent'.")
+                print("StageNow daemon is not available. Start it with 'StageNow --daemon' or install it via '--install-agent'.")
             case .timeout:
                 print("StageManager daemon did not respond in time.")
             case .invalidEndpoint:
@@ -237,7 +237,7 @@ class StageManagerApp {
         do {
             let manager = LaunchAgentManager()
             try manager.install(configPath: configPath)
-            print("StageManager launch agent installed at \(LaunchAgentManager.agentPlistURL.path)")
+            print("StageNow launch agent installed at \(LaunchAgentManager.agentPlistURL.path)")
             return 0
         } catch let error as LaunchAgentManager.AgentError {
             print(error.description)
@@ -252,7 +252,7 @@ class StageManagerApp {
         do {
             let manager = LaunchAgentManager()
             try manager.uninstall()
-            print("StageManager launch agent uninstalled")
+            print("StageNow launch agent uninstalled")
             return 0
         } catch let error as LaunchAgentManager.AgentError {
             print(error.description)
@@ -263,10 +263,6 @@ class StageManagerApp {
         }
     }
 
-
-}
-
-extension StageManagerApp {
     private func resolveSpaceIdentifier(_ rawValue: String) -> UInt64? {
         let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
