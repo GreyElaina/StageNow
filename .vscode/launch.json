@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:stage-now}",
+            "name": "Debug StageManager",
+            "program": "${workspaceFolder:stage-now}/.build/debug/StageManager",
+            "preLaunchTask": "swift: Build Debug StageManager"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:stage-now}",
+            "name": "Release StageManager",
+            "program": "${workspaceFolder:stage-now}/.build/release/StageManager",
+            "preLaunchTask": "swift: Build Release StageManager"
+        }
+    ]
+}
