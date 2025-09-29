@@ -49,7 +49,7 @@ class StageManagerApp {
             return 0
         }
 
-        if arguments.contains("--toggle") {
+        if arguments.contains("--toggle-globally") {
             stageManagerControl.toggleStageManager()
             return 0
         }
@@ -96,7 +96,7 @@ class StageManagerApp {
             return performSpaceCommand(.set(spaceId, false))
         }
 
-        if arguments.contains("--toggle-current") {
+        if arguments.contains("--toggle") {
             if let currentSpaceId = SpaceDetector.getCurrentSpaceID() {
                 return performSpaceCommand(.toggle(currentSpaceId))
             } else {
@@ -105,7 +105,7 @@ class StageManagerApp {
             }
         }
 
-        if arguments.contains("--space-status") {
+        if arguments.contains("--snapshot") {
             return performSpaceCommand(.status)
         }
 
@@ -139,34 +139,32 @@ class StageManagerApp {
 
         OPTIONS:
           --daemon              Run in background to monitor space changes
-          --toggle              Toggle Stage Manager on/off
+
           --enable              Enable Stage Manager
           --disable             Disable Stage Manager
-          --status              Show current status and configuration
-          --config <file>       Load configuration from file
+          --status              Show current status
+          --snapshot            Print spaces tracked by the daemon in JSON format
+          --toggle-globally     Toggle Stage Manager on/off
+
+          --toggle              Toggle Stage Manager for the current space
           --space-toggle <id>   Toggle Stage Manager for a specific space
           --space-enable <id>   Enable Stage Manager for the given space
           --space-disable <id>  Disable Stage Manager for the given space
-          --space-status        Show enabled spaces tracked by the daemon
-          --toggle-current      Toggle Stage Manager for the current space
+
           --install-agent       Install and start the StageManager launch agent (persists daemon)
           --reinstall-agent     Reinstall the StageManager launch agent
           --uninstall-agent     Stop and remove the StageManager launch agent
           --help, -h            Show help information
 
-        CONFIGURATION:
-          The configuration file should be JSON format:
-          {
-            "enabledSpaces": ["6413880206913680394", "386104155358555563"]
-          }
-
         RUNTIME CONTROL:
           When the daemon is running, the CLI communicates via XPC.
           Start the daemon first:
             StageManager --daemon
+          Or install the launch agent to run it automatically:
+            StageManager --install-agent
           Then run commands such as:
-            StageManager --space-toggle 6413880206913680394
-            StageManager --space-status
+            StageManager --toggle
+            StageManager --snapshot
         """)
     }
 
