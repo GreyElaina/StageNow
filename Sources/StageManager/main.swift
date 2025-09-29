@@ -1,17 +1,32 @@
 import Foundation
 import AppKit
 
-// Check if we're running in daemon mode
-if CommandLine.arguments.contains("--daemon") {
-    // Run as proper app for daemon mode
+enum AppMode {
+    case daemon
+    case commandLine
+}
+
+func getAppMode() -> AppMode {
+    return CommandLine.arguments.contains("--daemon") ? .daemon : .commandLine
+}
+
+func runDaemonMode() -> Never {
     let daemonApp = NSApplication.shared
     daemonApp.setActivationPolicy(.accessory)
     let appDelegate = DaemonAppDelegate()
     daemonApp.delegate = appDelegate
     daemonApp.run()
-} else {
-    // Run as command line tool for other modes
+    fatalError("runDaemonMode() should never return")
+}
+
+func runCommandLineMode() -> Int32 {
     let app = StageManagerApp()
-    let exitCode = app.run()
-    exit(exitCode)
+    return app.run()
+}
+
+switch getAppMode() {
+case .daemon:
+    runDaemonMode()
+case .commandLine:
+    exit(runCommandLineMode())
 }

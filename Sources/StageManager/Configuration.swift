@@ -40,13 +40,30 @@ final class Configuration {
         }
     }
 
+    func loadConfig(from url: URL) -> Bool {
+        do {
+            let data = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode(StageManagerConfig.self, from: data)
+            let spaces = Set(decoded.enabledSpaces.compactMap { UInt64($0) })
+            setEnabledSpaces(spaces)
+            print("[Config] Loaded \(spaces.count) spaces from \(url.path)")
+            return true
+        } catch {
+            print("[Config] Failed to load configuration from \(url.path): \(error)")
+            return false
+        }
+    }
+
     func addObserver(_ handler: @escaping (ConfigurationChange) -> Void) -> UUID {
         let token = UUID()
+        let initialSnapshot = queue.sync { enabledSpaces }
+
         queue.sync {
             observers[token] = handler
         }
+
         // Send initial snapshot
-        handler(ConfigurationChange(spaceId: nil, isEnabled: nil, enabledSpaces: snapshotEnabledSpaces()))
+        handler(ConfigurationChange(spaceId: nil, isEnabled: nil, enabledSpaces: initialSnapshot))
         return token
     }
 
@@ -57,7 +74,7 @@ final class Configuration {
     }
 
     func enabledSpacesSnapshot() -> Set<UInt64> {
-        return snapshotEnabledSpaces()
+        return queue.sync { enabledSpaces }
     }
 
     func shouldEnableStageManager(for spaceId: UInt64) -> Bool {
@@ -69,57 +86,69 @@ final class Configuration {
     @discardableResult
     func toggleSpace(_ spaceId: UInt64) -> Bool {
         var newState = false
-        var snapshot: Set<UInt64> = []
+        var shouldNotify = false
+
         queue.sync {
-            if enabledSpaces.contains(spaceId) {
-                enabledSpaces.remove(spaceId)
-                newState = false
-            } else {
+            let wasEnabled = enabledSpaces.contains(spaceId)
+            newState = !wasEnabled
+
+            if newState {
                 enabledSpaces.insert(spaceId)
-                newState = true
+            } else {
+                enabledSpaces.remove(spaceId)
             }
-            snapshot = enabledSpaces
+
+            shouldNotify = true
         }
-        notifyChange(spaceId: spaceId, isEnabled: newState, snapshot: snapshot)
+
+        if shouldNotify {
+            let snapshot = queue.sync { enabledSpaces }
+            notifyChange(spaceId: spaceId, isEnabled: newState, snapshot: snapshot)
+        }
+
         return newState
     }
 
     func setSpace(_ spaceId: UInt64, enabled: Bool) {
-        var changed = false
-        var snapshot: Set<UInt64> = []
+        var shouldNotify = false
+
         queue.sync {
-            let contains = enabledSpaces.contains(spaceId)
-            if enabled != contains {
-                changed = true
+            let currentlyEnabled = enabledSpaces.contains(spaceId)
+            if enabled != currentlyEnabled {
                 if enabled {
                     enabledSpaces.insert(spaceId)
                 } else {
                     enabledSpaces.remove(spaceId)
                 }
+                shouldNotify = true
             }
-            snapshot = enabledSpaces
         }
-        if changed {
+
+        if shouldNotify {
+            let snapshot = queue.sync { enabledSpaces }
             notifyChange(spaceId: spaceId, isEnabled: enabled, snapshot: snapshot)
         }
     }
 
     func setEnabledSpaces(_ spaces: Set<UInt64>) {
         queue.sync {
+            guard enabledSpaces != spaces else { return }
             enabledSpaces = spaces
         }
         notifyChange(spaceId: nil, isEnabled: nil, snapshot: spaces)
     }
 
-    private func snapshotEnabledSpaces() -> Set<UInt64> {
-        return queue.sync { enabledSpaces }
-    }
+    // Removed snapshotEnabledSpaces() - use queue.sync { enabledSpaces } directly
 
     private func notifyChange(spaceId: UInt64?, isEnabled: Bool?, snapshot: Set<UInt64>) {
         let handlers: [((ConfigurationChange) -> Void)] = queue.sync { Array(observers.values) }
         let change = ConfigurationChange(spaceId: spaceId, isEnabled: isEnabled, enabledSpaces: snapshot)
-        for handler in handlers {
-            handler(change)
+
+        // Use async dispatch to avoid potential deadlocks
+        DispatchQueue.global(qos: .userInitiated).async {
+            for handler in handlers {
+                handler(change)
+            }
         }
     }
 }

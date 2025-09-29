@@ -4,8 +4,7 @@ Stage Manager is a macOS utility that offers CLI and daemon tooling for managing
 
 ## Raycast Integration
 
-A Raycast script command is available to trigger `StageManager --toggle-current` directly from the Raycast launcher.
-wx 
+A Raycast script command is available to trigger `StageManager --toggle-current` directly from the Raycast launcher. 
 ### Installation
 
 1. Build or install the Stage Manager CLI so the `StageManager` binary is available on your `PATH`, or keep this repository locally with a built product inside `.build`.
