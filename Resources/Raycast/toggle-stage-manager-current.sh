@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-STAGE_MANAGER_BIN="${STAGE_MANAGER_BIN:-StageManager}"
+STAGE_MANAGER_BIN="${STAGE_MANAGER_BIN:-StageNow}"
 
 if command -v "$STAGE_MANAGER_BIN" >/dev/null 2>&1; then
   "$STAGE_MANAGER_BIN" --toggle
@@ -26,20 +26,20 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ -x "$REPO_ROOT/.build/release/StageManager" ]; then
-  "$REPO_ROOT/.build/release/StageManager" --toggle
+if [ -x "$REPO_ROOT/.build/release/StageNow" ]; then
+  "$REPO_ROOT/.build/release/StageNow" --toggle
   exit $?
 fi
 
-if [ -x "$REPO_ROOT/.build/debug/StageManager" ]; then
-  "$REPO_ROOT/.build/debug/StageManager" --toggle
+if [ -x "$REPO_ROOT/.build/debug/StageNow" ]; then
+  "$REPO_ROOT/.build/debug/StageNow" --toggle
   exit $?
 fi
 
 if command -v swift >/dev/null 2>&1; then
-  (cd "$REPO_ROOT" && swift run StageManager --toggle)
+  (cd "$REPO_ROOT" && swift run StageNow --toggle)
   exit $?
 fi
 
-echo "StageManager CLI not found. Set STAGE_MANAGER_BIN or build the project (swift build)." >&2
+echo "StageNow CLI not found. Set STAGE_MANAGER_BIN or build the project (swift build)." >&2
 exit 1
