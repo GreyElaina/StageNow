@@ -40,6 +40,9 @@ final class StageManagerService: NSObject, NSXPCListenerDelegate {
         spaceMonitor.onSpaceChange = { [weak self] spaceId, spaceNumber in
             self?.handleSpaceChange(spaceId: spaceId, spaceNumber: spaceNumber)
         }
+        spaceMonitor.onSpacesRemoved = { [weak self] removedSpaceIds in
+            self?.handleSpacesRemoved(removedSpaceIds: removedSpaceIds)
+        }
         spaceMonitor.startMonitoring()
 
         stateQueue.async { [weak self] in
@@ -88,6 +91,20 @@ final class StageManagerService: NSObject, NSXPCListenerDelegate {
             if self.currentSpaceID != 0 {
                 self.applyStageManagerState(for: self.currentSpaceID, spaceNumber: self.currentSpaceNumber)
             }
+        }
+    }
+
+    private func handleSpacesRemoved(removedSpaceIds: Set<UInt64>) {
+        stateQueue.async { [weak self] in
+            guard let self else { return }
+
+            // Remove from known space IDs
+            self.knownSpaceIDs.subtract(removedSpaceIds)
+
+            // Clean up configuration
+            self.configuration.removeSpaces(removedSpaceIds)
+
+            print("[Service] Cleaned up \(removedSpaceIds.count) deleted spaces from internal state")
         }
     }
 

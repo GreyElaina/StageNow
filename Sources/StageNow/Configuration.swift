@@ -138,6 +138,26 @@ final class Configuration {
         notifyChange(spaceId: nil, isEnabled: nil, snapshot: spaces)
     }
 
+    func removeSpaces(_ spaceIds: Set<UInt64>) {
+        var removedSpaces: Set<UInt64> = []
+        var shouldNotify = false
+
+        queue.sync {
+            for spaceId in spaceIds {
+                if enabledSpaces.remove(spaceId) != nil {
+                    removedSpaces.insert(spaceId)
+                }
+            }
+            shouldNotify = !removedSpaces.isEmpty
+        }
+
+        if shouldNotify {
+            let snapshot = queue.sync { enabledSpaces }
+            print("[Config] Removed \(removedSpaces.count) deleted spaces from enabled list: \(removedSpaces.map(String.init).sorted().joined(separator: ", "))")
+            notifyChange(spaceId: nil, isEnabled: nil, snapshot: snapshot)
+        }
+    }
+
     // Removed snapshotEnabledSpaces() - use queue.sync { enabledSpaces } directly
 
     private func notifyChange(spaceId: UInt64?, isEnabled: Bool?, snapshot: Set<UInt64>) {

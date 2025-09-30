@@ -4,6 +4,7 @@ import CoreGraphics
 
 final class SpaceMonitor {
     var onSpaceChange: ((UInt64, Int) -> Void)?
+    var onSpacesRemoved: ((Set<UInt64>) -> Void)?
     private var observers: [NSObjectProtocol] = []
     private var timer: Timer?
     private var currentSpaceID: UInt64 = 0
@@ -13,6 +14,7 @@ final class SpaceMonitor {
     private var spaceIDToSpaceNumber: [UInt64: Int] = [:]
     private var nextSpaceNumber: Int = 1
     private var lastSpaceOrderSignature: String?
+    private var hasDetectedSpaces = false
 
     func startMonitoring() {
         print("[Listen] Starting space monitoring...")
@@ -122,11 +124,31 @@ final class SpaceMonitor {
             return
         }
 
+        let currentSpaceIDs = Set(orderedSpaceIDs)
+        let knownSpaceIDs = Set(spaceIDToSpaceNumber.keys)
+
+        // Detect removed spaces (only after we've initially detected spaces)
+        if hasDetectedSpaces {
+            let removedSpaceIDs = knownSpaceIDs.subtracting(currentSpaceIDs)
+            if !removedSpaceIDs.isEmpty {
+                print("[Listen] Detected removed spaces: \(removedSpaceIDs.map(String.init).sorted().joined(separator: ", "))")
+                onSpacesRemoved?(removedSpaceIDs)
+
+                // Remove from mapping
+                for removedID in removedSpaceIDs {
+                    spaceIDToSpaceNumber.removeValue(forKey: removedID)
+                }
+            }
+        }
+
+        hasDetectedSpaces = true
+
         var updatedMapping: [UInt64: Int] = [:]
         for (index, id) in orderedSpaceIDs.enumerated() {
             updatedMapping[id] = index + 1
         }
 
+        // Preserve mapping for spaces that might be temporarily unavailable
         for (id, number) in spaceIDToSpaceNumber where updatedMapping[id] == nil {
             updatedMapping[id] = number
         }

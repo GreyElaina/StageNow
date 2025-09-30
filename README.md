@@ -7,9 +7,9 @@ Stage Manager is a macOS utility that offers CLI and daemon tooling for managing
 ### Homebrew (recommended)
 
 ```bash
-brew tap GreyElaina/stagenow
-brew install GreyElaina/stagenow/stagenow
-brew services start GreyElaina/stagenow/stagenow
+brew tap GreyElaina/homebrew
+brew install GreyElaina/homebrew/stagenow
+brew services start GreyElaina/homebrew/stagenow
 ```
 
 ### Manual build
